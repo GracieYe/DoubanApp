@@ -1,0 +1,13 @@
+<resources>
+
+    <string name="app_name">我的豆瓣</string>
+    <string name="name">(豆瓣客户端)</string>
+    <string name="version">版本号</string>
+    <string name="newBook">豆瓣新书</string>
+    <string name="login">登录</string>
+    <string name="exist">退出</string>
+    <string name="userLogin">用户登录</string>
+    <string name="inputEmial">输入电子邮件地址</string>
+    <string name="inputPsw">输入密码</string>
+	<string name="clearUser">清除帐号</string>
+</resources>
