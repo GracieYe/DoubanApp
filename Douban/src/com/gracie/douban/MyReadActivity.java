@@ -14,29 +14,36 @@ import com.google.gdata.data.douban.Subject;
 import com.google.gdata.data.douban.UserEntry;
 import com.google.gdata.data.extensions.Rating;
 import com.gracie.douban.domain.Book;
+import com.gracie.douban.util.LoadImageAsynTask;
+import com.gracie.douban.util.LoadImageAsynTask.LoadImageAsynTaskCallback;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 
 	private ListView subjectList;
 	MyReadAdapter adapter;
-	Map<String,SoftReference<Bitmap>> iconCache; //key是图片的URL,value是一个软引用类型的Bitmap,把图片缓存在内存中
+	Map<String, SoftReference<Bitmap>> iconCache;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.subject);
 		super.onCreate(savedInstanceState);
 		
-		//初始化内存缓存
-		iconCache=new HashMap<String,SoftReference<Bitmap>>();
+		// 初始化内存缓存
+		iconCache = new HashMap<String, SoftReference<Bitmap>>();
 	}
 	
 	@Override
@@ -67,7 +74,7 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 				super.onPostExecute(result);
 				if(result!=null){
 					if(adapter==null){
-						adapter=new MyReadAdapter(MyReadActivity.this, result);
+						adapter=new MyReadAdapter(result);
 						subjectList.setAdapter(adapter);
 					}
 				}else{
@@ -82,7 +89,7 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 					String userId=ue.getUid();
 					
 					//获取用户所以收集的信息
-					CollectionFeed feeds=doubanService.getUserCollections(userId, "book", null, null, 1, 4);
+					CollectionFeed feeds=doubanService.getUserCollections(userId, "book", null, null, 1, 6);
 					List<Book> books=new ArrayList<Book>();
 					
 					for(CollectionEntry ce:feeds.getEntries()){
@@ -143,6 +150,118 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 			long id) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private class MyReadAdapter extends BaseAdapter {
+
+		private List<Book> books;
+
+		public MyReadAdapter(List<Book> books) {
+			this.books = books;
+		}
+
+		public void addMoreBook(List<Book> books) {
+			for (Book book : books) {
+				this.books.add(book);
+			}
+		}
+
+		public int getCount() {
+
+			return books.size();
+		}
+
+		public Object getItem(int position) {
+			// TODO Auto-generated method stub
+			return books.get(position);
+		}
+
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return position;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = View.inflate(MyReadActivity.this, R.layout.book_item,
+					null);
+			final ImageView iv_book = (ImageView) view
+					.findViewById(R.id.book_img);
+			RatingBar rb = (RatingBar) view.findViewById(R.id.ratingbar);
+			TextView tv_title = (TextView) view.findViewById(R.id.book_title);
+			TextView tv_description = (TextView) view
+					.findViewById(R.id.book_description);
+			Book book = books.get(position);
+			if (book.getRating() != 0) {
+				rb.setRating(book.getRating());
+			} else {
+				rb.setVisibility(View.INVISIBLE);
+			}
+			tv_description.setText(book.getDescription());
+			tv_title.setText(book.getName());
+			// 判断 图片是否在sd卡上存在
+
+			String iconpath = book.getBookUrl();
+			final String iconname = iconpath.substring(
+					iconpath.lastIndexOf("/") + 1, iconpath.length());
+			/*
+			 * File file = new File("/sdcard/" + iconname); if (file.exists()) {
+			 * iv_book.setImageURI(Uri.fromFile(file));
+			 * System.out.println("使用sd卡缓存"); } else {
+			 */
+
+			if (iconCache.containsKey(iconname)) {
+				SoftReference<Bitmap> softref = iconCache.get(iconname);
+				if (softref != null) {
+					Bitmap bitmap = softref.get();
+					if (bitmap != null) {
+						System.out.println("使用内存缓存 ");
+						iv_book.setImageBitmap(bitmap);
+					} else {
+						loadimage(iv_book, book, iconname);
+					}
+
+				}
+
+			} else {
+
+				loadimage(iv_book, book, iconname);
+			}
+			return view;
+		}
+
+		private void loadimage(final ImageView iv_book, Book book,final String iconname) {
+			
+			LoadImageAsynTask task = new LoadImageAsynTask(
+					new LoadImageAsynTaskCallback() {
+						public void beforeLoadImage() {
+
+							iv_book.setImageResource(R.drawable.book);
+						}
+
+						public void afterLoadImage(Bitmap bitmap) {
+							if (bitmap != null) {
+								System.out.println("下载服务器图片");
+								iv_book.setImageBitmap(bitmap);
+								/*
+								 * // 把bitmap存放到sd卡上 try { File file = new
+								 * File("/sdcard/" + iconname); FileOutputStream
+								 * stream = new FileOutputStream( file);
+								 * bitmap.compress(CompressFormat.JPEG, 100,
+								 * stream); } catch (Exception e) {
+								 * e.printStackTrace(); }
+								 */
+								// 把图片存放到内存缓存里面
+								iconCache.put(iconname,
+										new SoftReference<Bitmap>(bitmap));
+
+							} else {
+								iv_book.setImageResource(R.drawable.book);
+							}
+
+						}
+					});
+			task.execute(book.getBookUrl());
+		}
 	}
 
 }
