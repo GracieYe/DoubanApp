@@ -42,11 +42,13 @@ public final class R {
         public static final int EditTextEmail=0x7f07000e;
         public static final int EditTextPassword=0x7f07000f;
         public static final int ImageViewCaptcha=0x7f070012;
-        public static final int LinearLayout01=0x7f070020;
+        public static final int LinearLayout01=0x7f070025;
         public static final int back_button=0x7f070007;
         public static final int book_description=0x7f070004;
         public static final int book_img=0x7f070001;
         public static final int book_title=0x7f070003;
+        public static final int bt_next=0x7f070023;
+        public static final int bt_pre=0x7f070022;
         public static final int btnExit=0x7f070014;
         public static final int btnLogin=0x7f070013;
         public static final int director_icon=0x7f070017;
@@ -56,31 +58,32 @@ public final class R {
         public static final int imgUser=0x7f070019;
         public static final int inner_login=0x7f070009;
         public static final int l_section1=0x7f07000c;
-        public static final int layout_books=0x7f070023;
+        public static final int layout_books=0x7f070020;
         public static final int list_item_layout=0x7f070000;
         public static final int ll_captcha=0x7f070010;
+        public static final int ll_next_pre=0x7f070021;
         public static final int loading=0x7f07001d;
-        public static final int logo=0x7f070021;
+        public static final int logo=0x7f070026;
         public static final int mainRL=0x7f070018;
-        public static final int main_tab_menu_clear_user=0x7f07002b;
-        public static final int melv=0x7f07002a;
+        public static final int main_tab_menu_clear_user=0x7f07002e;
+        public static final int melv=0x7f07002d;
         public static final int myTitle=0x7f070006;
         public static final int progress=0x7f07001e;
         public static final int ratingbar=0x7f070002;
         public static final int scroll_login=0x7f070008;
         public static final int section1=0x7f07000b;
         public static final int subjectlist=0x7f070024;
-        public static final int tabMainNav=0x7f070025;
-        public static final int tab_nav_book=0x7f070028;
-        public static final int tab_nav_book_img=0x7f070029;
-        public static final int tab_nav_me=0x7f070026;
-        public static final int tab_nav_me_img=0x7f070027;
+        public static final int tabMainNav=0x7f070028;
+        public static final int tab_nav_book=0x7f07002b;
+        public static final int tab_nav_book_img=0x7f07002c;
+        public static final int tab_nav_me=0x7f070029;
+        public static final int tab_nav_me_img=0x7f07002a;
         public static final int title_bar=0x7f070005;
         public static final int txtUserAddress=0x7f07001b;
         public static final int txtUserDescription=0x7f07001c;
         public static final int txtUserName=0x7f07001a;
         public static final int txt_loading=0x7f07001f;
-        public static final int versionNumber=0x7f070022;
+        public static final int versionNumber=0x7f070027;
         public static final int wrapper=0x7f07000d;
     }
     public static final class layout {
@@ -90,12 +93,13 @@ public final class R {
         public static final int main_tab=0x7f030003;
         public static final int me_item=0x7f030004;
         public static final int my_info=0x7f030005;
-        public static final int splash=0x7f030006;
-        public static final int subject=0x7f030007;
-        public static final int tab_main_nav=0x7f030008;
-        public static final int tabbook=0x7f030009;
-        public static final int tabme=0x7f03000a;
-        public static final int titlebar=0x7f03000b;
+        public static final int my_note=0x7f030006;
+        public static final int splash=0x7f030007;
+        public static final int subject=0x7f030008;
+        public static final int tab_main_nav=0x7f030009;
+        public static final int tabbook=0x7f03000a;
+        public static final int tabme=0x7f03000b;
+        public static final int titlebar=0x7f03000c;
     }
     public static final class menu {
         public static final int main_tab_menu=0x7f060000;

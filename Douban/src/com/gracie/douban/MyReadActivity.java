@@ -17,13 +17,19 @@ import com.gracie.douban.domain.Book;
 import com.gracie.douban.util.LoadImageAsynTask;
 import com.gracie.douban.util.LoadImageAsynTask.LoadImageAsynTaskCallback;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -36,11 +42,19 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 	private ListView subjectList;
 	MyReadAdapter adapter;
 	Map<String, SoftReference<Bitmap>> iconCache;
+	int startIndex; //获取信息的起始位置
+	int count; //每次获取信息的数目
+	int max=20;
+	boolean isLoading=false;
+	IntentFilter filter;
+	KillReceiver receiver;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.subject);
 		super.onCreate(savedInstanceState);
+		startIndex=1;
+		count=5;
 		
 		// 初始化内存缓存
 		iconCache = new HashMap<String, SoftReference<Bitmap>>();
@@ -50,11 +64,57 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 	public void setupView() {
 		loading=(RelativeLayout) findViewById(R.id.loading);
 		subjectList=(ListView) findViewById(R.id.subjectlist);
+		
+		filter=new IntentFilter();
+		filter.addAction("kill_activity_action");
+		receiver=new KillReceiver();
+		this.registerReceiver(receiver, filter);
 	}
 
 	@Override
 	public void setListener() {
-		subjectList.setOnItemClickListener(this);		
+		subjectList.setOnItemClickListener(this);
+		
+		//设置滚动监听器
+		subjectList.setOnScrollListener(new OnScrollListener() {
+			
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				switch(scrollState){
+				case OnScrollListener.SCROLL_STATE_IDLE:
+					//如果当前滚动状态为静止状态
+					//并且最后一个用户可见的条目为适配器中最后一个条目，则表示滚动到最后需要加载新数据
+					
+					//获取最后一个用户可见条目的位置
+					int position=view.getLastVisiblePosition();
+					int count=adapter.getCount();
+					
+					if(position==(count-1)){//代表拖动在了最下方
+						//获取新的数据
+						startIndex+=count;
+						if(startIndex>max){
+							showToast("数据已经加载到最大条目");
+							return;
+						}
+						
+						if(isLoading){
+							return;
+						}
+						fillData();
+					}
+					break;
+					
+				}
+				
+			}
+			
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 
 	@Override
@@ -64,7 +124,8 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 			
 			@Override
 			protected void onPreExecute() {
-				showLoading();
+				showLoading();	
+				isLoading=true;
 				super.onPreExecute();
 			}
 
@@ -76,10 +137,17 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 					if(adapter==null){
 						adapter=new MyReadAdapter(result);
 						subjectList.setAdapter(adapter);
+					}else{
+						//把获取的新数据加到适配器中，通知界面更新内容
+						adapter.addMoreBook(result);
+						
+						//通知数据适配器更新数据
+						adapter.notifyDataSetChanged();
 					}
 				}else{
 					showToast("获取数据失败");
 				}
+				isLoading=false;
 			}
 
 			@Override
@@ -89,7 +157,7 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 					String userId=ue.getUid();
 					
 					//获取用户所以收集的信息
-					CollectionFeed feeds=doubanService.getUserCollections(userId, "book", null, null, 1, 6);
+					CollectionFeed feeds=doubanService.getUserCollections(userId, "book", null, null, startIndex, count);
 					List<Book> books=new ArrayList<Book>();
 					
 					for(CollectionEntry ce:feeds.getEntries()){
@@ -264,4 +332,20 @@ public class MyReadActivity extends BaseActivity implements OnItemClickListener{
 		}
 	}
 
+	private class KillReceiver extends BroadcastReceiver{
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			iconCache=null;
+			showToast("内存不足activity退出");
+			finish();			
+		}		
+	}
+	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		unregisterReceiver(receiver);
+	}
 }
