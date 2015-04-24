@@ -44,6 +44,10 @@ public class MeFragment extends Fragment{
 						Intent myReadIntent=new Intent(getActivity(),MyReadActivity.class);
 						startActivity(myReadIntent);
 						break;
+					case 4:
+						Intent myNoteIntent=new Intent(getActivity(),MyNoteActivity.class);
+						startActivity(myNoteIntent);
+						break;
 					case 5:
 						Intent myInfoIntent=new Intent(getActivity(),MyInfoActivity.class);
 						startActivity(myInfoIntent);
